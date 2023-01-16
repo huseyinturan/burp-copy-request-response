@@ -44,7 +44,10 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
         httpRequest = httpTraffic.getRequest()
         httpResponse = httpTraffic.getResponse()
 
-        data = self.stripTrailingNewlines(httpRequest)
+        data = (self.str_to_array(str(httpTraffic.getUrl())))
+        data.append(13) # Line Break
+        data.append(13)
+        data.extend(self.stripTrailingNewlines(httpRequest))
         data.append(13) # Line Break
         data.append(13)
         data.extend(self.stripTrailingNewlines(httpResponse))
@@ -57,7 +60,10 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
         httpResponse = httpTraffic.getResponse()
         httpResponseBodyOffset = self.helpers.analyzeResponse(httpResponse).getBodyOffset()
 
-        data = self.stripTrailingNewlines(httpRequest)
+        data = (self.str_to_array(str(httpTraffic.getUrl())))
+        data.append(13) # Line Break
+        data.append(13)
+        data.extend(self.stripTrailingNewlines(httpRequest))
         data.append(13)
         data.append(13)
         data.extend(httpResponse[0:httpResponseBodyOffset])
@@ -73,7 +79,10 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
         selectionBounds = self.context.getSelectionBounds()
         httpResponseData = httpResponse[selectionBounds[0]:selectionBounds[1]]
 
-        data = self.stripTrailingNewlines(httpRequest)
+        data = (self.str_to_array(str(httpTraffic.getUrl())))
+        data.append(13) # Line Break
+        data.append(13)
+        data.extend(self.stripTrailingNewlines(httpRequest))
         data.append(13)
         data.append(13)
         data.extend(httpResponse[0:httpResponseBodyOffset])
