@@ -50,7 +50,10 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
         data.extend(self.stripTrailingNewlines(httpRequest))
         data.append(13) # Line Break
         data.append(13)
-        data.extend(self.stripTrailingNewlines(httpResponse))
+        if httpResponse is None:
+            data.extend(self.str_to_array("[NO RESPONSE]"))
+        else:
+            data.extend(self.stripTrailingNewlines(httpResponse))
 
         self.copyToClipboard(data)
 
@@ -58,7 +61,6 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
         httpTraffic = self.context.getSelectedMessages()[0]
         httpRequest = httpTraffic.getRequest()
         httpResponse = httpTraffic.getResponse()
-        httpResponseBodyOffset = self.helpers.analyzeResponse(httpResponse).getBodyOffset()
 
         data = (self.str_to_array(str(httpTraffic.getUrl())))
         data.append(13) # Line Break
@@ -66,8 +68,12 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
         data.extend(self.stripTrailingNewlines(httpRequest))
         data.append(13)
         data.append(13)
-        data.extend(httpResponse[0:httpResponseBodyOffset])
-        data.extend(self.str_to_array(self.CUT_TEXT))
+        if httpResponse is None:
+            data.extend(self.str_to_array("[NO RESPONSE]"))
+        else:
+            httpResponseBodyOffset = self.helpers.analyzeResponse(httpResponse).getBodyOffset()
+            data.extend(httpResponse[0:httpResponseBodyOffset])
+            data.extend(self.str_to_array(self.CUT_TEXT))
 
         self.copyToClipboard(data)
 
@@ -75,9 +81,6 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
         httpTraffic = self.context.getSelectedMessages()[0]
         httpRequest = httpTraffic.getRequest()
         httpResponse = httpTraffic.getResponse()
-        httpResponseBodyOffset = self.helpers.analyzeResponse(httpResponse).getBodyOffset()
-        selectionBounds = self.context.getSelectionBounds()
-        httpResponseData = httpResponse[selectionBounds[0]:selectionBounds[1]]
 
         data = (self.str_to_array(str(httpTraffic.getUrl())))
         data.append(13) # Line Break
@@ -85,12 +88,18 @@ class BurpExtender(IBurpExtender, IContextMenuFactory, IHttpRequestResponse):
         data.extend(self.stripTrailingNewlines(httpRequest))
         data.append(13)
         data.append(13)
-        data.extend(httpResponse[0:httpResponseBodyOffset])
-        data.extend(self.str_to_array(self.CUT_TEXT))
-        data.append(13)
-        data.extend(self.stripTrailingNewlines(httpResponseData))
-        data.append(13)
-        data.extend(self.str_to_array(self.CUT_TEXT))
+        if httpResponse is None:
+            data.extend(self.str_to_array("[NO RESPONSE]"))
+        else:
+            httpResponseBodyOffset = self.helpers.analyzeResponse(httpResponse).getBodyOffset()
+            selectionBounds = self.context.getSelectionBounds()
+            httpResponseData = httpResponse[selectionBounds[0]:selectionBounds[1]]
+            data.extend(httpResponse[0:httpResponseBodyOffset])
+            data.extend(self.str_to_array(self.CUT_TEXT))
+            data.append(13)
+            data.extend(self.stripTrailingNewlines(httpResponseData))
+            data.append(13)
+            data.extend(self.str_to_array(self.CUT_TEXT))
 
         # Ugly hack because VMware is messing up the clipboard if a text is still selected, the function
         # has to be run in a separate thread which sleeps for 1.5 seconds.
